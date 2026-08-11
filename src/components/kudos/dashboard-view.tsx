@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -15,6 +16,15 @@ import {
 } from "@/components/ui/dialog";
 import { Heart, Plus, ExternalLink, MessageSquare, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  PRIMARY_BTN,
+  BRAND_FILL,
+  PAGE_BG,
+  HEADER,
+  CARD_INTERACTIVE,
+  SkeletonCard,
+  Spinner,
+} from "./design-system";
 
 interface Space {
   id: string;
@@ -47,7 +57,7 @@ export function DashboardView() {
       const data = await res.json();
       setSpaces(data.spaces || []);
     } catch {
-      toast({ title: "Error", description: "Failed to load spaces", variant: "destructive" });
+      toast({ title: "Failed to load", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -68,31 +78,32 @@ export function DashboardView() {
       });
       const data = await res.json();
       if (!res.ok) {
-        toast({ title: "Error", description: data.error, variant: "destructive" });
+        toast({ title: data.error, variant: "destructive" });
         return;
       }
       setSpaces((prev) => [data.space, ...prev]);
       setCreateOpen(false);
       setNewName("");
       setNewHeadline("");
-      toast({ title: "Space created!", description: `"${data.space.name}" is ready` });
+      toast({ title: "Space created" });
     } catch {
-      toast({ title: "Error", description: "Failed to create space", variant: "destructive" });
+      toast({ title: "Failed to create", variant: "destructive" });
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string, name: string) => {
+    e.stopPropagation();
     if (!confirm(`Delete "${name}" and all its testimonials?`)) return;
     try {
       const res = await fetch(`/api/spaces/detail?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setSpaces((prev) => prev.filter((s) => s.id !== id));
-        toast({ title: "Deleted", description: `"${name}" removed` });
+        toast({ title: "Space deleted" });
       }
     } catch {
-      toast({ title: "Error", description: "Failed to delete", variant: "destructive" });
+      toast({ title: "Delete failed", variant: "destructive" });
     }
   };
 
@@ -102,24 +113,38 @@ export function DashboardView() {
     setView({ page: "auth", mode: "login" });
   };
 
+  // Loading skeleton
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      <div className={`min-h-screen ${PAGE_BG}`}>
+        <header className={HEADER}>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Heart className={`h-5 w-5 ${BRAND_FILL}`} />
+              <span className="text-base font-semibold tracking-tight">Kudos</span>
+            </div>
+          </div>
+        </header>
+        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[0, 1, 2].map((i) => <SkeletonCard key={i} />)}
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50/50 via-white to-teal-50/50">
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div className={`min-h-screen ${PAGE_BG}`}>
+      {/* Header — consistent across all authenticated views */}
+      <header className={HEADER}>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Heart className="h-6 w-6 text-emerald-500 fill-emerald-500" />
-            <span className="text-xl font-bold tracking-tight">Kudos</span>
+            <Heart className={`h-5 w-5 ${BRAND_FILL}`} />
+            <span className="text-base font-semibold tracking-tight">Kudos</span>
           </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground hidden sm:block">
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-muted-foreground hidden sm:block">
               {user?.email}
             </span>
             <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -129,128 +154,130 @@ export function DashboardView() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex items-center justify-between mb-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {/* Page heading + primary action */}
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Your Spaces</h1>
-            <p className="text-muted-foreground mt-1">
-              Create spaces to collect and showcase testimonials
+            <h1 className="text-2xl font-semibold tracking-tight">Your Spaces</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Each space is a testimonial wall you can embed on your site
             </p>
           </div>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-emerald-500 hover:bg-emerald-600 text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Create Space
+              <Button className={PRIMARY_BTN}>
+                <Plus className="h-4 w-4 mr-1.5" />
+                New Space
               </Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Create a new Space</DialogTitle>
+                <DialogTitle className="text-lg font-semibold">New Space</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4 pt-4">
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Space Name</label>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="space-name" className="text-sm">Name</Label>
                   <Input
-                    placeholder="e.g. My SaaS Product"
+                    id="space-name"
+                    placeholder="e.g. Acme Product"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                   />
                 </div>
-                <div>
-                  <label className="text-sm font-medium mb-1.5 block">Headline</label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="space-headline" className="text-sm">Headline</Label>
                   <Input
-                    placeholder="e.g. See what our customers say"
+                    id="space-headline"
+                    placeholder="e.g. What our customers say"
                     value={newHeadline}
                     onChange={(e) => setNewHeadline(e.target.value)}
                   />
                 </div>
                 <Button
-                  className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
+                  className={`w-full ${PRIMARY_BTN}`}
                   onClick={handleCreate}
                   disabled={creating || !newName.trim()}
                 >
-                  {creating ? "Creating..." : "Create Space"}
+                  {creating && <Spinner className="h-4 w-4 mr-1.5" />}
+                  {creating ? "Creating…" : "Create Space"}
                 </Button>
               </div>
             </DialogContent>
           </Dialog>
         </div>
 
+        {/* Content — empty state or grid */}
         {spaces.length === 0 ? (
-          <Card className="border-dashed">
-            <CardContent className="py-16 text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground/40 mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2">No spaces yet</h3>
-              <p className="text-muted-foreground mb-6">
-                Create your first space to start collecting testimonials
-              </p>
-              <Button
-                className="bg-emerald-500 hover:bg-emerald-600 text-white"
-                onClick={() => setCreateOpen(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Space
-              </Button>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl border border-dashed border-gray-200 bg-white py-16 px-6 text-center">
+            <MessageSquare className="h-8 w-8 text-gray-300 mx-auto mb-4" />
+            <h2 className="text-base font-semibold mb-1">No spaces yet</h2>
+            <p className="text-sm text-muted-foreground mb-5">
+              Create a space to start collecting testimonials
+            </p>
+            <Button className={PRIMARY_BTN} onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" />
+              New Space
+            </Button>
+          </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {spaces.map((space) => (
               <Card
                 key={space.id}
-                className="group hover:shadow-lg transition-all duration-200 cursor-pointer border-0 shadow-sm"
+                className={CARD_INTERACTIVE}
                 onClick={() => setView({ page: "space", spaceId: space.id })}
+                role="button"
+                tabIndex={0}
+                aria-label={`Open ${space.name}`}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") setView({ page: "space", spaceId: space.id });
+                }}
               >
-                <CardHeader className="pb-3">
+                <CardHeader className="p-5 pb-2">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-3 h-3 rounded-full"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: space.themeColor }}
+                        aria-hidden="true"
                       />
-                      <CardTitle className="text-lg">{space.name}</CardTitle>
+                      <CardTitle className="text-base font-semibold">{space.name}</CardTitle>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/* Hover actions — accessible via aria-label */}
+                    <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-7 w-7"
+                        aria-label="Preview wall"
                         onClick={(e) => {
                           e.stopPropagation();
                           setView({ page: "wall", slug: space.slug });
                         }}
                       >
-                        <ExternalLink className="h-4 w-4" />
+                        <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(space.id, space.name);
-                        }}
+                        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                        aria-label="Delete space"
+                        onClick={(e) => handleDelete(e, space.id, space.name)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-5 pb-5 pt-0">
                   {space.headline && (
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                    <p className="text-sm text-muted-foreground mb-3 line-clamp-1">
                       {space.headline}
                     </p>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-xs">
-                      {space._count?.testimonials || 0} testimonial{(space._count?.testimonials || 0) !== 1 ? "s" : ""}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs font-mono">
-                      {space.slug}
-                    </Badge>
-                  </div>
+                  <Badge variant="secondary" className="text-xs font-normal">
+                    {space._count?.testimonials || 0} testimonial{(space._count?.testimonials || 0) !== 1 ? "s" : ""}
+                  </Badge>
                 </CardContent>
               </Card>
             ))}

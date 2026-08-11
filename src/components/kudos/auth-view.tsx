@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Heart, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PRIMARY_BTN, BRAND_FILL, PAGE_BG } from "./design-system";
 
 export function AuthView() {
   const { view, setView, setUser } = useAppStore();
@@ -16,11 +17,13 @@ export function AuthView() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const isLogin = view.page === "auth" && view.mode === "login";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     setSubmitting(true);
 
     try {
@@ -36,130 +39,140 @@ export function AuthView() {
       const data = await res.json();
 
       if (!res.ok) {
-        toast({ title: "Error", description: data.error, variant: "destructive" });
+        setError(data.error || "Something went wrong");
         return;
       }
 
       setUser(data.user);
       setView({ page: "dashboard" });
-      toast({ title: isLogin ? "Welcome back!" : "Account created!", description: "You're now signed in." });
+      toast({ title: isLogin ? "Welcome back" : "Account created" });
     } catch {
-      toast({ title: "Error", description: "Something went wrong", variant: "destructive" });
+      setError("Network error — please try again");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-4">
-      <div className="w-full max-w-md">
+    <div className={`min-h-screen flex items-center justify-center ${PAGE_BG} p-4`}>
+      <div className="w-full max-w-sm">
+        {/* Brand */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-emerald-500 fill-emerald-500" />
-            <span className="text-3xl font-bold tracking-tight">Kudos</span>
+          <div className="inline-flex items-center gap-2 mb-2">
+            <Heart className={`h-5 w-5 ${BRAND_FILL}`} />
+            <span className="text-base font-semibold tracking-tight">Kudos</span>
           </div>
-          <p className="text-muted-foreground">
-            Collect & showcase testimonials that sell
+          <p className="text-sm text-muted-foreground">
+            Collect and showcase customer testimonials
           </p>
         </div>
 
-        <Card className="border-0 shadow-xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">
-              {isLogin ? "Sign in to your account" : "Create your account"}
+        {/* Auth card */}
+        <Card className="rounded-xl border border-gray-100 shadow-sm">
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-lg font-semibold">
+              {isLogin ? "Sign in" : "Create account"}
             </CardTitle>
-            <CardDescription>
-              {isLogin
-                ? "Enter your credentials to continue"
-                : "Get started with Kudos in seconds"}
+            <CardDescription className="text-sm">
+              {isLogin ? "Enter your email and password" : "Set up your account to get started"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
               {!isLogin && (
-                <div className="space-y-2">
-                  <Label htmlFor="name">Name</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-sm">Name</Label>
                   <Input
                     id="name"
                     placeholder="Your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    className="h-9"
                   />
                 </div>
               )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-sm">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder="you@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  className="h-9"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="password" className="text-sm">Password</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
+                  placeholder="Min. 6 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
+                  className="h-9"
                 />
               </div>
+
+              {/* Inline error */}
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
+
               <Button
                 type="submit"
-                className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
+                className={`w-full h-9 ${PRIMARY_BTN}`}
                 disabled={submitting}
               >
-                {submitting ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
-                {!submitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                {submitting ? "Signing in…" : isLogin ? "Sign in" : "Create account"}
+                {!submitting && <ArrowRight className="ml-1.5 h-3.5 w-3.5" />}
               </Button>
             </form>
 
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
+            {/* Toggle */}
+            <p className="mt-5 text-center text-sm text-muted-foreground">
+              {isLogin ? "No account? " : "Have an account? "}
               <button
                 type="button"
-                className="text-emerald-600 hover:text-emerald-700 font-medium underline-offset-4 hover:underline"
+                className="text-emerald-600 hover:text-emerald-700 font-medium underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded-sm"
                 onClick={() =>
-                  setView({
-                    page: "auth",
-                    mode: isLogin ? "register" : "login",
-                  })
+                  setView({ page: "auth", mode: isLogin ? "register" : "login" })
                 }
               >
-                {isLogin ? "Sign up" : "Sign in"}
+                {isLogin ? "Create one" : "Sign in"}
               </button>
-            </div>
+            </p>
           </CardContent>
         </Card>
 
-        <div className="mt-6 text-center">
+        {/* Demo data link */}
+        <p className="mt-5 text-center text-xs text-muted-foreground">
           <button
             type="button"
-            className="text-sm text-muted-foreground hover:text-emerald-600 transition-colors"
+            className="hover:text-emerald-600 transition-colors underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 rounded-sm"
             onClick={async () => {
               try {
                 const res = await fetch("/api/seed", { method: "POST" });
                 const data = await res.json();
                 if (res.ok) {
                   toast({
-                    title: "Demo data seeded!",
+                    title: "Demo data ready",
                     description: `Login: ${data.user?.email} / ${data.user?.password}`,
                   });
                 }
               } catch {
-                toast({ title: "Error", description: "Failed to seed demo data", variant: "destructive" });
+                toast({ title: "Seeding failed", variant: "destructive" });
               }
             }}
           >
-            Or try with demo data →
+            Load demo data
           </button>
-        </div>
+        </p>
       </div>
     </div>
   );
