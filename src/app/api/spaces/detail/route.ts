@@ -8,9 +8,9 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { searchParams! } = new URL(req.url);
-  const id = searchParams.get("id");
-  const slug = searchParams.get("slug");
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
+  const slug = url.searchParams.get("slug");
 
   if (id) {
     const space = await db.space.findFirst({
@@ -50,8 +50,8 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
-  const { searchParams! } = new URL(req.url);
-  const id = searchParams.get("id");
+  const url = new URL(req.url);
+  const id = url.searchParams.get("id");
 
   if (!id) {
     return NextResponse.json({ error: "Space ID required" }, { status: 400 });

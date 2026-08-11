@@ -61,8 +61,8 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const { searchParams! } = new URL(req.url);
-    const id = searchParams.get("id");
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
 
     if (!id) {
       return NextResponse.json(

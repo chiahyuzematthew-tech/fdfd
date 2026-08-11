@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
-  const { searchParams! } = new URL(req.url);
-  const spaceId = searchParams.get("spaceId");
-  const status = searchParams.get("status");
+  const url = new URL(req.url);
+  const spaceId = url.searchParams.get("spaceId");
+  const status = url.searchParams.get("status");
 
   if (!spaceId) {
     return NextResponse.json(
