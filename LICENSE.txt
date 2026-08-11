@@ -1,0 +1,21 @@
+FULL IP TRANSFER & MASTER RESALE RIGHTS LICENSE
+
+Copyright (c) 2025 Kudos
+
+This license grants the buyer the following rights:
+
+1. FULL IP TRANSFER: The buyer acquires full intellectual property rights to the software, including but not limited to the source code, design, documentation, and all associated materials.
+
+2. MODIFICATION RIGHTS: The buyer may modify, adapt, alter, or enhance the software in any way without limitation.
+
+3. REBRANDING RIGHTS: The buyer may rebrand, relabel, or repackage the software under any name, brand, or identity.
+
+4. RESALE RIGHTS: The buyer may sell, license, distribute, or otherwise commercialize the software, whether in its original form or as modified, without any royalty or obligation to the original author.
+
+5. SUBLICENSING RIGHTS: The buyer may grant sublicenses to third parties under terms of the buyer's choosing.
+
+6. NO ATTRIBUTION REQUIRED: The buyer is not required to provide attribution, credit, or notice to the original author in any distribution or derivative work.
+
+7. EXCLUSIVE RIGHTS: These rights are transferred exclusively to the buyer. The original author relinquishes all claims to the intellectual property upon transfer.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
